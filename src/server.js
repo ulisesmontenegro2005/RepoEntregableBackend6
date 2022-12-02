@@ -1,4 +1,5 @@
 const express = require('express')
+const fs = require('fs')
 const app = express()
 
 const { Server: HttpServer } = require('http')
@@ -9,22 +10,35 @@ const io = new Socket(httpServer)
 
 
 const products = []
+const messages = []
 
-// ACTIONS OF PRODUCTS
+// ACTIONS
 
 io.on('connection', socket => {
     console.log('New user connected');
 
+//    OF PRODUCTS
 
     socket.emit('products', products);
     socket.on('update-products', data => {
         products.push(data);
         io.sockets.emit('products', products);
-        console.log(products);
     })
-    
 
+//    OF CHAT APP
+    
+    socket.emit('messages', messages)
+    socket.on('update-chat', data => {
+        messages.push(data);
+
+        fs.writeFile('./public/files/messages.txt', JSON.stringify(messages), 'utf-8', (err) => {
+            console.log(err);
+        });
+
+        io.sockets.emit('messages', messages)
+    })
 })
+
 /////
 
 app.use(express.json())

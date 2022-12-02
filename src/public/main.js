@@ -26,3 +26,32 @@ async function renderProducts(products) {
     const html = functionTemplate({ products });
     document.getElementById('productos').innerHTML = html;
 }
+
+// ACTIONS OF CHAT APP
+
+const formChat = document.getElementById('form-chat');
+formChat.addEventListener('submit', e => {
+    e.preventDefault();
+
+    const hora = new Date();
+
+    const message = {
+        mail: document.getElementById('chat-mail').value,
+        msg: document.getElementById('chat-msg').value,
+        hora: '[' + hora.toLocaleString() + ']'
+    }
+
+    socket.emit('update-chat', message);
+    document.getElementById('chat-msg').value = '';
+})
+
+socket.on('messages', renderMessages)
+async function renderMessages(messages) {
+
+    const fetchRender = await fetch('hbs/chat.hbs');
+    const textoPlantilla = await fetchRender.text();
+    const functionTemplate = Handlebars.compile(textoPlantilla);
+
+    const html = functionTemplate({ messages });
+    document.getElementById('chat').innerHTML = html;
+} 
